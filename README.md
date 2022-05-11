@@ -8,7 +8,7 @@
 
 参考[notebook](https://github.com/acgmusic/SouBaiduPan-master/blob/main/example/tutorial.ipynb)
 
-1. 安装**SouBaiduPan**`
+1. 安装**SouBaiduPan**
    
     ```cmd
         pip install SouBaiduPan
@@ -30,11 +30,15 @@
     ```
 
 1. 执行下方代码，即可开始搜索。如果需要**在浏览器中自动打开搜索到的网盘链接**，请务必下载Chrome浏览器自动化测试驱动，方法请参考: https://zhuanlan.zhihu.com/p/373688337
+
    一些参数解释：
 
     `show`: 打印搜索到的链接，建议勾选。
+
     `show_origin_url`: 是否显示所有度盘链接的原链接。但如果提取码没识别到，则一定会显示。
+
     `open_in_Chrome`: 自动在Chrome浏览器中打开所有链接。请务必先安装驱动程序。
+    
     `save_json_path`: 保存为json文件的路径。建议用搜索词命名，文件后缀为.json
     
     ```pythno
