@@ -19,7 +19,7 @@ class BaiduPanSearcher:
         self.simple_headers = {'User-Agent': HEADERS_DEFAULT['User-Agent']}
         self.keywords = keywords
         self.max_page_nums = max_page_nums
-        self.dupan_urls = []
+        self._dupan_url_list = []
 
     def set_cookie(self, cookie: str):
         assert len(cookie) > 20
@@ -59,7 +59,10 @@ class BaiduPanSearcher:
         if response.status_code == 302:  # 如果返回302，就从响应头获取真实地址
             real_url = response.headers.get('Location')
         else:  # 否则从返回内容中用正则表达式提取出来真实地址
-            real_url = re.findall("URL='(.*?)'", response.text)[0]
+            try:
+                real_url = re.findall("URL='(.*?)'", response.text)[0]
+            except IndexError:
+                raise Exception(f"真实链接获取失败 {v_url}")
         return real_url
 
     def get_one_page_of_baidu(self, page_num):
@@ -70,7 +73,11 @@ class BaiduPanSearcher:
         res = []
         res += tree.xpath("//div[@id='content_left']/div//h3/a/@href")
         res += tree.xpath("//div[@id='content_left']/div//h4/a/@href")
-        return res
+        outer_chains = []
+        for link in res:
+            if "www.baidu.com/link" in link:
+                outer_chains.append(link)
+        return outer_chains
 
     def get_pages_of_baidu(self):
         fake_url_list = res_pool_parallel(
@@ -172,20 +179,22 @@ class BaiduPanSearcher:
         https://zhuanlan.zhihu.com/p/373688337
         :save_json_path: 保存为json文件的路径。建议用搜索词命名，文件后缀为.json
         """
-        url_list = self.get_pages_of_baidu()
-        dupan_url_list = res_pool_parallel(
-            self._find_data_url_and_pwd_in_rawtext,
-            [(url,) for url in url_list],
-            unpacked=True
-        )
+        if not self._dupan_url_list:
+            url_list = self.get_pages_of_baidu()
+            dupan_url_list = res_pool_parallel(
+                self._find_data_url_and_pwd_in_rawtext,
+                [(url,) for url in url_list],
+                unpacked=True
+            )
+            self._dupan_url_list = dupan_url_list
 
         if save_json_path is not None:
             with open(save_json_path, 'w', encoding="utf-8") as f:
-                f.write(json.dumps(dupan_url_list))
+                f.write(json.dumps(self._dupan_url_list))
 
         if show:
             print("=" * 40, " 有效链接 ", "=" * 40)
-            for url_info in dupan_url_list:
+            for url_info in self._dupan_url_list:
                 if (url_info['state'] == 2) or (url_info['state'] == 1 and url_info['pwd']):
                     print("_" * 60)
                     print("链接: ", url_info['url'])
@@ -194,7 +203,7 @@ class BaiduPanSearcher:
                     if show_origin_url:
                         print("原网页: ", url_info['original_url'])
             print("=" * 40, " 需自行查找提取码 ", "=" * 40, '\n')
-            for url_info in dupan_url_list:
+            for url_info in self._dupan_url_list:
                 if url_info['state'] == 1 and (not url_info['pwd']):
                     print("_" * 60)
                     print("链接: ", url_info['url'])
@@ -204,7 +213,7 @@ class BaiduPanSearcher:
         if open_in_Chrome:
             self._driver = Chrome()
             full_url_list = []
-            for url_info in dupan_url_list:
+            for url_info in self._dupan_url_list:
                 if url_info['state'] == 0:
                     continue
                 elif url_info['state'] == 1:
@@ -221,6 +230,9 @@ class BaiduPanSearcher:
                     self._driver.execute_script,
                     [(f"window.open('{full_url}')",) for full_url in full_url_list[1:]]
                 )
+
+    def show_dupan_urls(self):
+        return self._dupan_url_list
 
 
 if __name__ == '__main__':

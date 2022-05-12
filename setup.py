@@ -14,7 +14,7 @@ URL = 'https://github.com/acgmusic/SouBaiduPan-master'
 EMAIL = '1152764556@qq.com'
 AUTHOR = 'acgmusic'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.2'
+VERSION = '0.1.4'
 
 
 REQUIRED = [
