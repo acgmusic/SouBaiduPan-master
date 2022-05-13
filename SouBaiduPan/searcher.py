@@ -14,24 +14,28 @@ HEADERS_DEFAULT = {
 
 
 class BaiduPanSearcher:
+
+    headers = HEADERS_DEFAULT
+    simple_headers = {'User-Agent': HEADERS_DEFAULT['User-Agent']}
+
     def __init__(self, keywords, max_page_nums=20):
-        self.headers = HEADERS_DEFAULT
-        self.simple_headers = {'User-Agent': HEADERS_DEFAULT['User-Agent']}
+        # self.headers = HEADERS_DEFAULT
+        # self.simple_headers = {'User-Agent': HEADERS_DEFAULT['User-Agent']}
         self.keywords = keywords
         self.max_page_nums = max_page_nums
         self._dupan_url_list = []
 
     def set_cookie(self, cookie: str):
         assert len(cookie) > 20
-        self.headers['Cookie'] = cookie
+        self.__class__.headers['Cookie'] = cookie
 
     def set_user_agent(self, user_agent: str):
-        self.headers['User-Agent'] = user_agent
-        self.simple_headers = {'User-Agent': user_agent}
+        self.__class__.headers['User-Agent'] = user_agent
+        self.__class__.simple_headers = {'User-Agent': user_agent}
 
     def reset_headers(self):
-        self.headers = HEADERS_DEFAULT
-        self.simple_headers = {'User-Agent': HEADERS_DEFAULT['User-Agent']}
+        self.__class__.headers = HEADERS_DEFAULT
+        self.__class__.simple_headers = {'User-Agent': HEADERS_DEFAULT['User-Agent']}
 
     # 获取网页源代码
     def get_page_text(self, url):
@@ -73,11 +77,8 @@ class BaiduPanSearcher:
         res = []
         res += tree.xpath("//div[@id='content_left']/div//h3/a/@href")
         res += tree.xpath("//div[@id='content_left']/div//h4/a/@href")
-        outer_chains = []
-        for link in res:
-            if "www.baidu.com/link" in link:
-                outer_chains.append(link)
-        return outer_chains
+        res = [link for link in res if "www.baidu.com/link" in link]
+        return res
 
     def get_pages_of_baidu(self):
         fake_url_list = res_pool_parallel(
