@@ -1,3 +1,13 @@
+python 3.5之后的版本，如果报错
+```
+>>> from lxml import etree
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ImportError: DLL load failed while importing etree: 找不到指定的模块。
+```
+请参考 https://www.pianshen.com/article/97511170584/
+
+
 # SouBaiduPan-master
 
 # 百度网盘搜索工具
