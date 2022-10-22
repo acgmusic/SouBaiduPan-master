@@ -5,7 +5,10 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 ImportError: DLL load failed while importing etree: 找不到指定的模块。
 ```
-请参考 https://www.pianshen.com/article/97511170584/
+请更新lxml包（具体原因可能是你的lxml是在pycharm里下载的）
+```
+pip install --upgrade lxml
+```
 
 
 # SouBaiduPan-master
